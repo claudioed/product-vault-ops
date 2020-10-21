@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-go-vault-sidecar
+  labels:
+    app: product-go-vault-sidecar
+spec:
+  selector:
+    matchLabels:
+      app: product-go-vault-sidecar
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-product-go-vault-sidecar: "secret/product-go-vault-sidecar"
+        vault.hashicorp.com/role: "microservices"
+        vault.hashicorp.com/update: "true"
+        vault.hashicorp.com/agent-inject-template-product-go-vault-sidecar: |
+          {{ with secret "secret/product-go-vault-sidecar" }} {{ .Data.data | toJSONPretty }} {{ end }}
+        vault.hashicorp.com/secret-volume-path-product-vault-sidecar: vault/secrets/apps
+        vault.hashicorp.com/agent-inject-file-product-vault-sidecar: product-go-vault-sidecar
+      labels:
+        app: product-go-vault-sidecar
+    spec:
+      serviceAccountName: product-go-vault-sidecar
+      containers:
+        - name: product-go-vault-sidecar
+          image: claudioed/product-go-vault-sidecar:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: product-vault-go-config

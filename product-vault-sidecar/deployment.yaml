@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-vault-sidecar
+  labels:
+    app: product-vault-sidecar
+spec:
+  selector:
+    matchLabels:
+      app: product-vault-sidecar
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-secret-product-vault-sidecar: "secret/product-vault-sidecar"
+        vault.hashicorp.com/role: "microservices"
+        vault.hashicorp.com/update: "true"
+        vault.hashicorp.com/agent-inject-template-product-vault-sidecar: |
+          {{ with secret "secret/product-vault-sidecar" }}
+            spring.datasource.username: {{ .Data.data.DB_USER }}
+            spring.datasource.password: {{ .Data.data.DB_PASS }}
+          {{ end }}
+        vault.hashicorp.com/secret-volume-path-product-vault-sidecar: vault/secrets/apps
+        vault.hashicorp.com/agent-inject-file-product-vault-sidecar: product-vault-sidecar.yaml
+      labels:
+        app: product-vault-sidecar
+    spec:
+      serviceAccountName: product-vault-sidecar
+      containers:
+        - name: product-vault-sidecar
+          image: claudioed/product-vault-sidecar:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: product-vault-sidecar-config
+          env:
+            - name: SPRING_CONFIG_ADDITIONAL-LOCATION
+              value: file:///vault/secrets/apps/product-vault-sidecar.yaml
