@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-vault-spring-config
+  labels:
+    app: product-vault-spring-config
+spec:
+  selector:
+    matchLabels:
+      app: product-vault-spring-config
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: product-vault-spring-config
+    spec:
+      serviceAccountName: product-vault-spring-config
+      containers:
+        - name: product-vault-spring-config
+          image: claudioed/product-vault-spring-config:latest
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: product-vault-spring-config
+          env:
+            - name: product-vault-spring-config
+              valueFrom:
+                secretKeyRef:
+                  name: product-vault-spring-config
+                  key: VAULT_TOKEN
