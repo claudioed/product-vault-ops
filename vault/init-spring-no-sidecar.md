@@ -36,5 +36,5 @@ vault write auth/kubernetes/role/microservices \
 ```
 
 ```shell script
-vault kv put secret/product-vault-spring DB_USER=postgres DB_PASS=mysecretpassword
+vault kv put secret/product-vault-spring spring.datasource.username=postgres spring.datasource.password=mysecretpassword
 ```

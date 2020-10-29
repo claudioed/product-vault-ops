@@ -28,11 +28,11 @@ vault write auth/kubernetes/config \
 ```
 
 ```shell script
-vault write auth/kubernetes/role/microservices \
+vault write auth/kubernetes/role/product-vault-sidecar \
    bound_service_account_names=product-vault-sidecar \
    bound_service_account_namespaces=sidecar \
    policies=app \
-   ttl=1h
+   ttl=30s
 ```
 
 ```shell script
